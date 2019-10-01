@@ -12,15 +12,7 @@ class OrmPrimeSpeakSqlite implements iOrmPrimeSpeak {
       $optDefaults = [
         'database' => '',
       ];
-      foreach($opts as $k => $v)
-      {
-        if (!isset($optDefaults[$k]))
-        {
-          continue;
-        }
-        $optDefaults[$k] = $v;
-      }
-      $opts = $optDefaults;
+      $opts = array_replace($optDefaults, array_intersect_key($opts, $optDefaults));
 
       return "sqlite:" . $opts['database'];
   }
@@ -31,15 +23,7 @@ class OrmPrimeSpeakSqlite implements iOrmPrimeSpeak {
       'table' => '',
       'fields' => [],
     ];
-    foreach($opts as $k => $v)
-    {
-      if (!isset($optDefaults[$k]))
-      {
-        continue;
-      }
-      $optDefaults[$k] = $v;
-    }
-    $opts = $optDefaults;
+    $opts = array_replace($optDefaults, array_intersect_key($opts, $optDefaults));
 
     $keys = [];
     $tKeys = [];
@@ -62,15 +46,7 @@ class OrmPrimeSpeakSqlite implements iOrmPrimeSpeak {
       'fields' => [],
       'where' => ''
     ];
-    foreach($opts as $k => $v)
-    {
-      if (!isset($optDefaults[$k]))
-      {
-        continue;
-      }
-      $optDefaults[$k] = $v;
-    }
-    $opts = $optDefaults;
+    $opts = array_replace($optDefaults, array_intersect_key($opts, $optDefaults));
 
     $keys = [];
     foreach($opts['fields'] as $k => $v)
@@ -103,15 +79,7 @@ class OrmPrimeSpeakSqlite implements iOrmPrimeSpeak {
       'rows' => 50,
       'limit' => '*',
     ];
-    foreach($opts as $k => $v)
-    {
-      if (!isset($optDefaults[$k]))
-      {
-        continue;
-      }
-      $optDefaults[$k] = $v;
-    }
-    $opts = $optDefaults;
+    $opts = array_replace($optDefaults, array_intersect_key($opts, $optDefaults));
 
     $sql = 'SELECT '  . implode(', ', $opts['fields']) . ' '
       . 'FROM ' . $opts['table'] . ' ';
@@ -155,15 +123,7 @@ class OrmPrimeSpeakSqlite implements iOrmPrimeSpeak {
       'where' => '',
       'limit' => '*',
     ];
-    foreach($opts as $k => $v)
-    {
-      if (!isset($optDefaults[$k]))
-      {
-        continue;
-      }
-      $optDefaults[$k] = $v;
-    }
-    $opts = $optDefaults;
+    $opts = array_replace($optDefaults, array_intersect_key($opts, $optDefaults));
 
     $sql =  'DELETE FROM ' . $opts['table'] . ' ';
     if ($opts['where'] !== '')
@@ -183,15 +143,8 @@ class OrmPrimeSpeakSqlite implements iOrmPrimeSpeak {
     $optDefaults = [
       'table' => ''
     ];
-    foreach($opts as $k => $v)
-    {
-      if (!isset($optDefaults[$k]))
-      {
-        continue;
-      }
-      $optDefaults[$k] = $v;
-    }
-    $opts = $optDefaults;
+    $opts = array_replace($optDefaults, array_intersect_key($opts, $optDefaults));
+
     $sql =  'TRUNCATE ' . $opts['table'] . ';';
     return $sql;
   }
@@ -203,15 +156,8 @@ class OrmPrimeSpeakSqlite implements iOrmPrimeSpeak {
       'fields' => ['COUNT(*) as cnt'],
       'where' => '',
     ];
-    foreach($opts as $k => $v)
-    {
-      if (!isset($optDefaults[$k]))
-      {
-        continue;
-      }
-      $optDefaults[$k] = $v;
-    }
-    $opts = $optDefaults;
+    $opts = array_replace($optDefaults, array_intersect_key($opts, $optDefaults));
+
     $sql = "SELECT " . implode(', ', $opts['fields']) . " "
       . "FROM " . $opts['table'] . " ";
     if($opts['where'] !== '')

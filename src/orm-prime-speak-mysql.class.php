@@ -13,18 +13,64 @@ class OrmPrimeSpeakMysql implements iOrmPrimeSpeak {
         'host' => '',
         'database' => '',
       ];
-      foreach($opts as $k => $v)
-      {
-        if (!isset($optDefaults[$k]))
-        {
-          continue;
-        }
-        $optDefaults[$k] = $v;
-      }
-      $opts = $optDefaults;
+      $opts = array_replace($optDefaults, array_intersect_key($opts, $optDefaults));
 
       return "mysql:host=" . $opts['host'] . ';'
         . "dbname=" . $opts['database'];
+  }
+
+  public function Create($opts = [])
+  {
+    $optDefaults = [
+      'table' => '',
+      'fields' => [],
+      'primarykeys' => [],
+      'engine' => 'myisam',
+      'charset' => 'utf8'
+    ];
+
+    $opts = array_replace($optDefaults, array_intersect_key($opts, $optDefaults));
+
+    $fieldStructs = [];
+    foreach($opts['fields'] as $k => $v)
+    {
+      $pKey = "";
+      if (isset($v['is_key']))
+      {
+        $pKey = $k;
+      }
+      if ($pKey !== "")
+      {
+        $opt['primarykeys'][] = $pKey;
+      }
+      $fieldDef = "`" . $k . "` " . $v['type'] . "(" . $v['length'] . ") ";
+
+      $defValue = "''";
+      if (is_numeric($v['default_value']))
+      {
+        $defValue = '0';
+      }
+      if (is_float($v['default_value']))
+      {
+        $defValue = '0.00';
+      }
+      if(!empty($v['default_value']))
+      {
+        $defValue = $v['default_value'];
+      }
+
+      $fieldDef .= "DEFAULT " . $defValue;
+      $fieldStructs[] = $fieldDef;
+    }
+
+    $sql = "CREATE TABLE IF NOT EXISTS `" . $opts['table'] . "` "
+      . "(" . implode(', ', $fieldStructs) . ") "
+      . "ENGINE=" . $opts['engine'] . " "
+      . "DEFAULT CHARSET=" . $opts['charset'] . " ";
+    $sql .= (!empty($opts['primarykeys'])) ? implode(',', $opts['primarykeys']) : " ";
+    $sql .= ";";
+
+    return $sql;
   }
 
   public function Insert($opts = [])
@@ -33,15 +79,7 @@ class OrmPrimeSpeakMysql implements iOrmPrimeSpeak {
       'table' => '',
       'fields' => [],
     ];
-    foreach($opts as $k => $v)
-    {
-      if (!isset($optDefaults[$k]))
-      {
-        continue;
-      }
-      $optDefaults[$k] = $v;
-    }
-    $opts = $optDefaults;
+    $opts = array_replace($optDefaults, array_intersect_key($opts, $optDefaults));
 
     $keys = [];
     $tKeys = [];
@@ -64,15 +102,7 @@ class OrmPrimeSpeakMysql implements iOrmPrimeSpeak {
       'fields' => [],
       'where' => ''
     ];
-    foreach($opts as $k => $v)
-    {
-      if (!isset($optDefaults[$k]))
-      {
-        continue;
-      }
-      $optDefaults[$k] = $v;
-    }
-    $opts = $optDefaults;
+    $opts = array_replace($optDefaults, array_intersect_key($opts, $optDefaults));
 
     $keys = [];
     foreach($opts['fields'] as $k => $v)
@@ -105,15 +135,7 @@ class OrmPrimeSpeakMysql implements iOrmPrimeSpeak {
       'rows' => 50,
       'limit' => '*',
     ];
-    foreach($opts as $k => $v)
-    {
-      if (!isset($optDefaults[$k]))
-      {
-        continue;
-      }
-      $optDefaults[$k] = $v;
-    }
-    $opts = $optDefaults;
+    $opts = array_replace($optDefaults, array_intersect_key($opts, $optDefaults));
 
     $sql = 'SELECT '  . implode(', ', $opts['fields']) . ' '
       . 'FROM ' . $opts['table'] . ' ';
@@ -157,15 +179,7 @@ class OrmPrimeSpeakMysql implements iOrmPrimeSpeak {
       'where' => '',
       'limit' => '*',
     ];
-    foreach($opts as $k => $v)
-    {
-      if (!isset($optDefaults[$k]))
-      {
-        continue;
-      }
-      $optDefaults[$k] = $v;
-    }
-    $opts = $optDefaults;
+    $opts = array_replace($optDefaults, array_intersect_key($opts, $optDefaults));
 
     $sql =  'DELETE FROM ' . $opts['table'] . ' ';
     if ($opts['where'] !== '')
@@ -185,15 +199,8 @@ class OrmPrimeSpeakMysql implements iOrmPrimeSpeak {
     $optDefaults = [
       'table' => ''
     ];
-    foreach($opts as $k => $v)
-    {
-      if (!isset($optDefaults[$k]))
-      {
-        continue;
-      }
-      $optDefaults[$k] = $v;
-    }
-    $opts = $optDefaults;
+    $opts = array_replace($optDefaults, array_intersect_key($opts, $optDefaults));
+
     $sql =  'TRUNCATE ' . $opts['table'] . ';';
     return $sql;
   }
@@ -205,15 +212,8 @@ class OrmPrimeSpeakMysql implements iOrmPrimeSpeak {
       'fields' => ['COUNT(*) as cnt'],
       'where' => '',
     ];
-    foreach($opts as $k => $v)
-    {
-      if (!isset($optDefaults[$k]))
-      {
-        continue;
-      }
-      $optDefaults[$k] = $v;
-    }
-    $opts = $optDefaults;
+    $opts = array_replace($optDefaults, array_intersect_key($opts, $optDefaults));
+
     $sql = "SELECT " . implode(', ', $opts['fields']) . " "
       . "FROM " . $opts['table'] . " ";
     if($opts['where'] !== '')
