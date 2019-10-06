@@ -26,40 +26,41 @@ class OrmPrimeConnection {
     return $stmt;
   }
 
-  public function Insert($opts, $tokens)
+  public function Insert($table, $fieldVals)
   {
-    $cmd = $this->ormSpeak->Insert($opts);
-    $this->execute($cmd, $tokens);
+    $cmd = $this->ormSpeak->Insert($table, $fieldVals);
+    $this->execute($cmd, $fieldVals);
   }
 
-  public function Update($opts, $tokens)
+  public function Update($table, $fieldVals, $filterOpts = [])
   {
-    $cmd = $this->ormSpeak->Update($opts);
+    $cmd = $this->ormSpeak->Update($table, $fieldVals, $filterOpts);
+    $tokens = $fieldVals + $filterOpts['tokens'];
     return $this->execute($cmd, $tokens);
   }
 
-  public function Select($opts, $tokens)
+  public function Select($table, $fieldList = ['*'], $filterOpts = [])
   {
-    $cmd = $this->ormSpeak->Select($opts);
-    return $this->execute($cmd, $tokens);
+    $cmd = $this->ormSpeak->Select($table, $fieldList, $filterOpts);
+    return $this->execute($cmd, $filterOpts['tokens']);
   }
 
-  public function Delete($opts, $tokens)
+  public function Delete($table, $filterOpts = [])
   {
-    $cmd = $this->ormSpeak->Delete($opts);
-    return $this->execute($cmd, $tokens);
+    $cmd = $this->ormSpeak->Delete($table, $filterOpts);
+    return $this->execute($cmd, $filterOpts['tokens']);
   }
 
-  public function Truncate($opts)
+  public function Truncate($table)
   {
-    $cmd = $this->ormSpeak->Truncate($opts);
+    $cmd = $this->ormSpeak->Truncate($table);
     return $this->execute($cmd);
   }
 
-  public function Count($opts, $tokens = [])
+  public function Count($table, $filterOpts = [])
   {
-    $cmd = $this->ormSpeak->Count($opts);
-    $stmt = $this->execute($cmd, $tokens);
+    $cmd = $this->ormSpeak->Count($table, $filterOpts);
+    $stmt = $this->execute($cmd, $filterOpts['tokens']);
     $rowData = $stmt->fetch(PDO::FETCH_ASSOC);
     return $rowData['cnt'];
   }

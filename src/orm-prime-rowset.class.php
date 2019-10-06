@@ -98,10 +98,8 @@ class OrmPrimeRowset {
     $ormFilter = (new OrmPrimeFilter());
     $ormFilter->Where(implode(' AND ', $tokensWhere));
     $opts = $ormFilter->toArray();
-    $opts['fields'] =  $fields;
-    $opts['table'] = $this->table;
-    $tokens = $tokens + $fields;
-    $this->connProfile->Update($opts, $tokens);
+    $opts['tokens'] = $tokens;
+    $this->connProfile->Update($this->table, $fields, $opts);
   }
 
   public function Delete()
@@ -125,8 +123,8 @@ class OrmPrimeRowset {
     $ormFilter = (new OrmPrimeFilter());
     $ormFilter->Where(implode(' AND ', $tokensWhere));
     $opts = $ormFilter->toArray();
-    $opts['table'] = $this->table;
-    $this->connProfile->Delete($opts, $tokens);
+    $opts['tokens'] = $tokens;
+    $this->connProfile->Delete($this->table, $opts);
   }
 
   public function __destruct()

@@ -75,6 +75,7 @@ class OrmPrimeFilter{
           'limit' => '*',
           'groupfilter' => '', // use having
         ];
+        return $this;
     }
 
     public function toArray()

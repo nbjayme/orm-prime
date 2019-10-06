@@ -120,29 +120,21 @@ class OrmPrimeTable {
 
   public function Insert($arrValues)
   {
-    $opts = [
-      'table' => $this->table,
-      'fields' => $arrValues
-    ];
-    $this->connProfile->Insert($opts, $arrValues);
+    $this->connProfile->Insert($this->table, $arrValues);
     $this->ClearOrmFilter();
   }
 
-  public function Update($arrValues)
+  public function Update($fieldVals)
   {
     $opts = $this->OrmFilter()->toArray();
-    $opts['table'] = $this->table;
-    $opts['fields'] = $arrValues;
-    $tokens  = $arrValues + $opts['tokens'];
-    $this->connProfile->Update($opts, $tokens);
+    $this->connProfile->Update($this->table, $fieldVals, $opts);
     $this->ClearOrmFilter();
   }
 
-  public function Select()
+  public function Select($fieldList = ['*'])
   {
     $opts = $this->OrmFilter()->toArray();
-    $opts['table'] = $this->table;
-    $stmt = $this->connProfile->Select($opts, $opts['tokens']);
+    $stmt = $this->connProfile->Select($this->table, $fieldList, $opts);
     $this->ClearOrmFilter();
 
     $colls = [];
@@ -166,12 +158,12 @@ class OrmPrimeTable {
     return (new OrmPrimeCollections($colls));
   }
 
-  public function SelectOne()
+  public function SelectOne($fieldList = ['*'])
   {
     $ormFilter = $this->OrmFilter();
     $ormFilter->Page('*'); // disable pagination
     $ormFilter->Limit(1);
-    $colls = $this->Select();
+    $colls = $this->Select($fieldList);
     if($colls->Length() == 0)
     {
       return [];
@@ -182,17 +174,13 @@ class OrmPrimeTable {
   public function Delete()
   {
     $opts = $this->OrmFilter()->toArray();
-    $opts['table'] = $this->table;
-    $this->connProfile->Delete($opts, $opts['tokens']);
+    $this->connProfile->Delete($this->table, $opts);
     $this->ClearOrmFilter();
   }
 
   public function Truncate()
   {
-    $opts = [
-      'table' => $this->table,
-    ];
-    $this->connProfile->Truncate($opts);
+    $this->connProfile->Truncate($this->table);
     $this->ClearOrmFilter();
   }
 
@@ -201,7 +189,7 @@ class OrmPrimeTable {
     $opts = $this->OrmFilter()->toArray();
     $opts['fields'] = ['COUNT(*) AS cnt'];
     $opts['table'] = $this->table;
-    $num = $this->connProfile->Count($opts, $opts['tokens']);
+    $num = $this->connProfile->Count($this->table, $opts);
     $this->ClearOrmFilter();
     return $num;
   }
