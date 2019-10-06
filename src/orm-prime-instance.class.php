@@ -1,7 +1,7 @@
 <?php
 class OrmPrimeInstance {
   private static $instance = FALSE;
-  private $profiles = [];
+  private $connections = [];
 
   private function __construct()
   {
@@ -25,32 +25,29 @@ class OrmPrimeInstance {
 
   public function AddProfile($key, $profile)
   {
-    /*
-    [
+    $profileDefaults = [
       'dialect' => 'mysql',
       'host' => '',
       'user' => '',
       'password' => '',
       'database' => '',
-    ]
-    */
+    ];
+    $profile = array_replace($profileDefaults,
+      array_intersect_key($profile, $profileDefaults));
+
     $instance = OrmPrimeInstance::getInstance();
     if($profile['dialect'] == 'mysql')
     {
       $ormSpeak = new OrmPrimeSpeakMysql();
     }
+
     $connString = $ormSpeak->Connect($profile);
     try {
       $conn = new PDO($connString, $profile['user'], $profile['password']);
       $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
       $stmt = $conn->prepare('SET NAMES utf8');
       $stmt->execute();
-
-      $instance->profiles[$key] = [
-        'dialect' => $profile['dialect'],
-        'connection' => $conn,
-        'ormSpeak' => $ormSpeak,
-      ];
+      $instance->connections[$key] = new OrmPrimeConnection($conn, $ormSpeak);
     }
     catch (PDOException $e)
     {
@@ -63,21 +60,21 @@ class OrmPrimeInstance {
   public function getProfile($key)
   {
     $instance = OrmPrimeInstance::getInstance();
-    if (!isset($instance->profiles[$key]))
+    if (!isset($instance->connections[$key]))
     {
       return NULL;
     }
-    return $instance->profiles[$key];
+    return $instance->connections[$key];
   }
 
   public function __destruct()
   {
     $instance = OrmPrimeInstance::getInstance();
-    foreach($instance->profiles as $p)
+    foreach($instance->connections as $p)
     {
-      $p['connection'] = null;
+      $p = null;
     }
-    $instance->profiles = [];
+    $instance->connections = [];
   }
 
 }

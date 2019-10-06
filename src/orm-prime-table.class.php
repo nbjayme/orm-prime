@@ -9,8 +9,6 @@ class OrmPrimeTable {
   ];
 
   private $ormFilter = null;
-  private $ormSpeak = null;
-  private $connection = null;
   private $fields = null;
   private $table = '';
 
@@ -21,10 +19,8 @@ class OrmPrimeTable {
     {
       $instance = OrmPrimeInstance::getInstance();
       $connProfile = $instance->getProfile($connProfile);
-      $this->connProfile = $connProfile;
+      $this->connProfile = &$connProfile;
     }
-    $this->connection = & $this->connProfile['connection'];
-    $this->ormSpeak = & $this->connProfile['ormSpeak'];
 
     $this->arrOptions = $arrOptions;
     $this->table = & $this->arrOptions['table'];
@@ -128,9 +124,7 @@ class OrmPrimeTable {
       'table' => $this->table,
       'fields' => $arrValues
     ];
-    $cmd = $this->ormSpeak->Insert($opts);
-    $stmt = $this->connection->prepare($cmd);
-    $stmt->execute($arrValues);
+    $this->connProfile->Insert($opts, $arrValues);
     $this->ClearOrmFilter();
   }
 
@@ -139,9 +133,8 @@ class OrmPrimeTable {
     $opts = $this->OrmFilter()->toArray();
     $opts['table'] = $this->table;
     $opts['fields'] = $arrValues;
-    $cmd = $this->ormSpeak->Update($opts);
-    $stmt = $this->connection->prepare($cmd);
-    $stmt->execute($arrValues + $opts['tokens']);
+    $tokens  = $arrValues + $opts['tokens'];
+    $this->connProfile->Update($opts, $tokens);
     $this->ClearOrmFilter();
   }
 
@@ -149,9 +142,9 @@ class OrmPrimeTable {
   {
     $opts = $this->OrmFilter()->toArray();
     $opts['table'] = $this->table;
-    $cmd = $this->ormSpeak->Select($opts);
-    $stmt = $this->connection->prepare($cmd);
-    $stmt->execute($opts['tokens']);
+    $stmt = $this->connProfile->Select($opts, $opts['tokens']);
+    $this->ClearOrmFilter();
+
     $colls = [];
     while ($rowData = $stmt->fetch(PDO::FETCH_ASSOC))
     {
@@ -170,7 +163,6 @@ class OrmPrimeTable {
           'fields' => $f,
         ], $this->connProfile);
     }
-    $this->ClearOrmFilter();
     return (new OrmPrimeCollections($colls));
   }
 
@@ -184,7 +176,6 @@ class OrmPrimeTable {
     {
       return [];
     }
-    $this->ClearOrmFilter();
     return $colls->getIndex(0);
   }
 
@@ -192,9 +183,7 @@ class OrmPrimeTable {
   {
     $opts = $this->OrmFilter()->toArray();
     $opts['table'] = $this->table;
-    $cmd = $this->ormSpeak->Delete($opts);
-    $stmt = $this->connection->prepare($cmd);
-    $stmt->execute($opts['tokens']);
+    $this->connProfile->Delete($opts, $opts['tokens']);
     $this->ClearOrmFilter();
   }
 
@@ -203,9 +192,7 @@ class OrmPrimeTable {
     $opts = [
       'table' => $this->table,
     ];
-    $cmd = $this->ormSpeak->Truncate($opts);
-    $stmt = $this->connection->prepare($cmd);
-    $stmt->execute();
+    $this->connProfile->Truncate($opts);
     $this->ClearOrmFilter();
   }
 
@@ -214,12 +201,9 @@ class OrmPrimeTable {
     $opts = $this->OrmFilter()->toArray();
     $opts['fields'] = ['COUNT(*) AS cnt'];
     $opts['table'] = $this->table;
-    $cmd = $this->ormSpeak->Count($opts);
-    $stmt = $this->connection->prepare($cmd);
-    $stmt->execute($opts['tokens']);
-    $rowData = $stmt->fetch(PDO::FETCH_ASSOC);
+    $num = $this->connProfile->Count($opts, $opts['tokens']);
     $this->ClearOrmFilter();
-    return $rowData['cnt'];
+    return $num;
   }
 
 }

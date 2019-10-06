@@ -5,14 +5,10 @@ class OrmPrimeRowset {
   private $table = "";
   private $fields = [];
   private $connProfile = null;
-  private $ormSpeak = null;
-  private $connection = null;
 
   public function __construct($arrOptions, $connProfile)
   {
       $this->connProfile = $connProfile;
-      $this->connection = & $connProfile['connection'];
-      $this->ormSpeak = & $connProfile['ormSpeak'];
       $this->table = & $arrOptions['table'];
       $this->fields = & $arrOptions['fields']; // with values
   }
@@ -78,11 +74,6 @@ class OrmPrimeRowset {
     return json_encode($this->toArray());
   }
 
-  private function OrmSpeak()
-  {
-    return $this->ormSpeak;
-  }
-
   public function Save()
   {
     $tokens = [];
@@ -109,9 +100,8 @@ class OrmPrimeRowset {
     $opts = $ormFilter->toArray();
     $opts['fields'] =  $fields;
     $opts['table'] = $this->table;
-    $cmd = $this->ormSpeak->Update($opts);
-    $stmt = $this->connection->prepare($cmd);
-    $stmt->execute($tokens + $fields);
+    $tokens = $tokens + $fields;
+    $this->connProfile->Update($opts, $tokens);
   }
 
   public function Delete()
@@ -136,9 +126,7 @@ class OrmPrimeRowset {
     $ormFilter->Where(implode(' AND ', $tokensWhere));
     $opts = $ormFilter->toArray();
     $opts['table'] = $this->table;
-    $cmd = $this->ormSpeak->Delete($opts);
-    $stmt = $this->connection->prepare($cmd);
-    $stmt->execute($tokens);
+    $this->connProfile->Delete($opts, $tokens);
   }
 
   public function __destruct()

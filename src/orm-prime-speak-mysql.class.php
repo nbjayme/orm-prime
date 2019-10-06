@@ -7,6 +7,11 @@ class OrmPrimeSpeakMysql implements iOrmPrimeSpeak {
   {
   }
 
+  public function getDialect()
+  {
+    return $this->dialect;
+  }
+
   public function Connect($opts=[])
   {
       $optDefaults = [
