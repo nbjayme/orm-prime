@@ -153,12 +153,12 @@ class OrmPrimeSpeakSqlite implements iOrmPrimeSpeak {
   {
     $optDefaults = [
       'table' => '',
-      'fields' => ['COUNT(*) as cnt'],
       'where' => '',
     ];
     $opts = array_replace($optDefaults, array_intersect_key($opts, $optDefaults));
+    $opts['fields'] = 'COUNT(*) AS cnt';
 
-    $sql = "SELECT " . implode(', ', $opts['fields']) . " "
+    $sql = "SELECT " .  $opts['fields'] . " "
       . "FROM " . $opts['table'] . " ";
     if($opts['where'] !== '')
     {
